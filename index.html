@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>嶸鐿出差打卡</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <!-- 頂部列 -->
+    <header id="top-bar" class="top-bar hidden">
+      <div class="top-bar-brand">嶸鐿出差打卡</div>
+      <div id="user-badge" class="user-badge"></div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main id="main-content" class="main-content">
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p class="loading-text">正在連線驗證身分…</p>
+      </div>
+    </main>
+
+    <!-- 底部分頁列（僅啟用員工顯示） -->
+    <nav id="bottom-nav" class="bottom-nav hidden" aria-label="主選單">
+      <button type="button" class="nav-btn" data-page="checkin">
+        <span class="nav-icon">📍</span>
+        <span class="nav-label">打卡</span>
+      </button>
+      <button type="button" class="nav-btn" data-page="draft">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label">本月草稿</span>
+      </button>
+      <button type="button" class="nav-btn" data-page="records">
+        <span class="nav-icon">🗂️</span>
+        <span class="nav-label">我的紀錄</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- 通用彈窗（修改紀錄 / 同行挑選 / PDF 預覽） -->
+  <div id="modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div id="modal-sheet" class="modal-sheet"></div>
+  </div>
+
+  <!-- Toast 通知 -->
+  <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
