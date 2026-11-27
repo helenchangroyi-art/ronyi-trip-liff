@@ -104,6 +104,11 @@
 
   async function callGas(action, payload) {
     const url = window.APP_CONFIG.GAS_WEB_APP_URL;
+    // 每次呼叫前重新取得 ID Token（LIFF 開著很久時，舊的 Token 可能已過期）
+    try {
+      const fresh = liff.getIDToken();
+      if (fresh) state.idToken = fresh;
+    } catch (e) { /* 取不到就沿用舊的 */ }
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -124,11 +129,38 @@
 
     const json = await res.json();
     if (!json || !json.ok) {
+      if (json && json.code === 'TOKEN_EXPIRED') {
+        handleTokenExpired();
+      }
       const err = new Error((json && json.error) || '系統發生錯誤，請稍後再試');
       err.code = json && json.code ? json.code : 'ERROR';
       throw err;
     }
+    clearReauthFlag();
     return json.data;
+  }
+
+  // 登入逾時：第一次先重新整理頁面；重新整理後仍逾時，才重新走 LINE 登入，避免無限重整
+  const REAUTH_KEY = 'ronyi_trip_reauth';
+
+  function handleTokenExpired() {
+    let tried = false;
+    try { tried = sessionStorage.getItem(REAUTH_KEY) === '1'; } catch (e) { /* 部分環境不支援 */ }
+    showToast('登入逾時，已重新連線，請再按一次', 'error');
+    setTimeout(() => {
+      if (!tried) {
+        try { sessionStorage.setItem(REAUTH_KEY, '1'); } catch (e) { /* ignore */ }
+        window.location.reload();
+      } else {
+        try { sessionStorage.removeItem(REAUTH_KEY); } catch (e) { /* ignore */ }
+        try { liff.logout(); } catch (e) { /* ignore */ }
+        liff.login({ redirectUri: window.location.href });
+      }
+    }, 1200);
+  }
+
+  function clearReauthFlag() {
+    try { sessionStorage.removeItem(REAUTH_KEY); } catch (e) { /* ignore */ }
   }
 
   // ==========================================================================
@@ -329,11 +361,35 @@
         await reloadBootstrap();
         routeAndRender();
       } catch (err) {
+        if (err.code === 'NOT_FRIEND') {
+          renderNotFriendPage();
+          return;
+        }
         showToast(err.message, 'error');
         btn.disabled = false;
         btn.textContent = '完成註冊';
       }
     });
+  }
+
+  // 尚未加入官方帳號好友（後端註冊時檢查）
+  function renderNotFriendPage() {
+    $main().innerHTML = `
+      <div class="card" style="text-align:center;padding:40px 20px;">
+        <div style="font-size:48px;margin-bottom:12px;">👋</div>
+        <h1 class="page-title" style="justify-content:center;">請先加入官方帳號好友</h1>
+        <p style="font-size:17px;color:var(--text-muted);margin:8px 0 16px;line-height:1.7;">
+          在 LINE 搜尋「嶸鐿出差打卡」官方帳號並加入好友，<br />再關閉此頁面重新開啟即可註冊。
+        </p>
+        <button type="button" id="btn-close-liff" class="btn btn-primary btn-block btn-lg">關閉頁面</button>
+      </div>
+    `;
+    const closeBtn = document.getElementById('btn-close-liff');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        try { liff.closeWindow(); } catch (e) { /* 外部瀏覽器無法關閉 */ }
+      });
+    }
   }
 
   // ==========================================================================
