@@ -5,9 +5,9 @@
  */
 window.APP_CONFIG = {
   // 從 LINE Developers → LINE Login Channel → LIFF 取得的 LIFF ID（例如 '2001234567-AbCdEfGh'）
-  LIFF_ID: '',
+  LIFF_ID: '2012840460-umJg9L5t',
 
   // 從 Google Apps Script「部署 → 新增部署作業 → 網頁應用程式」取得的網址
   // 例如 'https://script.google.com/macros/s/AKfycb.../exec'
-  GAS_WEB_APP_URL: '',
+  GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxCsFWmpHDipFDlnbDk_GMv6pyF58CismU09ZDWpgQRhA34ScifVtcLEVCT34yHafJWmA/exec',
 };
